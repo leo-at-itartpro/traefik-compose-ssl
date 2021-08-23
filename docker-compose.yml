@@ -1,0 +1,43 @@
+services:
+  traefik:
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
+    image: traefik
+    ports:
+      - 443:443
+      - 8080:8080
+      - 80:80 
+    logging:
+      options:
+        max-size: 5m
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /appservices/uploads/logs:/appservices/uploads/logs
+      - ./traefik:/etc/traefik
+
+  traefik-certs-dumper:
+    image: ldez/traefik-certs-dumper:v2.7.4
+    entrypoint: sh -c '
+      apk add jq
+      ; while ! [ -e /data/acme.json ]
+      || ! [ `jq ".[] | .Certificates | length" /data/acme.json` != 0 ]; do
+      sleep 1
+      ; done
+      && traefik-certs-dumper file --version v2 --watch --domain-subdir --crt-ext=.pem --key-ext=.pem
+      --source /data/acme.json --dest /data/certs'
+    volumes:
+      - ./traefik/acme:/data
+
+   whoami:
+     image: "traefik/whoami"
+     labels:
+       - "traefik.enable=true"
+       - "traefik.http.routers.whoami.rule=Host(`your-site.com`)"
+       - "traefik.http.routers.whoami.entrypoints=websecure"
+       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+
+networks:
+  default:
+    external:
+      name: yournetworkname

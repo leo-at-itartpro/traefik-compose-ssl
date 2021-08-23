@@ -1,0 +1,34 @@
+log:
+  level: ERROR
+  filePath: "/appservices/uploads/logs/traefik.log"
+
+providers:
+  docker: true
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+
+entrypoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entrypoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+  pgadmin:
+    address: :8081
+  dashboard:
+    address: :8080
+
+certificatesresolvers:
+  myresolver:
+    acme:
+      email: mail@name.domain
+      storage: /etc/traefik/acme/acme.json
+      dnsChallenge:
+        provider: cloudflare
+
+api:
+  dashboard: true
