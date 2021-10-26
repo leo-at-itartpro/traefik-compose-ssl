@@ -19,7 +19,32 @@ Zone DNS  Edit
 ````
 and write the token key in .env file
 
--6. Run docker-compose up. Whoami is provided in docker-compose.yml as a means to test everything worked. You can delete it if you have other containers set-up. I prefer to leave this traefik, along with its docker-compose.yml alone, and for my projects I use other docker-compose.yml and in those projects services I use "labels" and "networks" to connect to traefik.
+-6. Run docker-compose up. Whoami is provided in docker-compose.yml as a means to test everything worked. You can delete it if you have other containers set-up. I prefer to leave this traefik, along with its docker-compose.yml alone, and for my projects I use other docker-compose.yml and in those projects services I use "labels" and "networks" to connect to traefik. Here is an example docker-compose.yml for a website that connects to traefik
+````
+networks:
+  yournetworkname:
+    external: true
+
+# just one service here, running a nextjs app for example
+services:
+  nextjs:
+  # here would be a bunch of other labels like logging, build, ports, volumes, tty
+  networks:
+    - yournetworkname
+  # and all this good stuff below is what connects our traefik container, in a seperate folder somewhere on the host, to this particular project, and applys middlewares   
+  labels:
+    - "traefik.enable=true"
+    - "traefik.http.services.nextjs.loadbalancer.server.port=3000"
+    - "traefik.http.routers.yourroutername1.rule=Host(`yourwebsite.com`)"
+    - "traefik.http.routers.yourroutername1.entrypoints=websecure"
+    - "traefik.http.routers.yourroutername1.tls.certresolver=myresolver"
+    - "traefik.http.routers.yourroutername1.tls.domains[0].main=yourwebsite.com"
+    - "traefik.http.routers.yourroutername1.tls.domains[0].sans=*.yourwebsite.com"
+    - "traefik.http.middlewares.yourmidwarename1.ratelimit.average=30"
+    - "traefik.http.middlewares.yourmidwarename1.ratelimit.burst=100"
+    - "traefik.http.middlewares.yourmidwarename1.ratelimit.period=1"
+    - "traefik.http.routers.yourroutername1.middlewares=yourmidwarename1@docker"
+````
 
 P.S.
 The traefik-certs-dumper is not needed to make a traefik with ssl site - but is included here for generation of .pem files from acme.json to be used by other code in other containers. For example Go http server uses .pem files for TLS connection.
