@@ -19,7 +19,7 @@ Zone DNS  Edit
 ````
 and write the token key in .env file
 
--6. Run docker-compose up. Whoami is provided in docker-compose.up as a means to test everything worked. You can delete it if you have other containers set-up.
+-6. Run docker-compose up. Whoami is provided in docker-compose.yml as a means to test everything worked. You can delete it if you have other containers set-up. I prefer to leave this traefik, along with its docker-compose.yml alone, and for my projects I use other docker-compose.yml and in those projects services I use "labels" and "networks" to connect to traefik.
 
 P.S.
 The traefik-certs-dumper is not needed to make a traefik with ssl site - but is included here for generation of .pem files from acme.json to be used by other code in other containers. For example Go http server uses .pem files for TLS connection.
