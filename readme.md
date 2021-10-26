@@ -6,11 +6,11 @@ The set-up for certificate retrieval is outlined in traefik.yml and is made to w
 
 -1. make a new docker network with `docker network create yournetworkname` use this network to connect your containers
 
--2. change email in traefik.yml
+-2. change email in traefik/traefik.yml
 
 -3. set-up a subdomain for traefik dashboard (something like traefik.your-site.com) and write it in dynamic_conf.yml
 
--4. in dynamic_conf.yml set up a basic auth login and password hash (make a hash with some site that makes basic auth hashes)
+-4. in traefik/dynamic_conf.yml set up a basic auth login and password hash (make a hash with some site that makes basic auth hashes)
 
 -5. make a dns token in cloudflare (https://dash.cloudflare.com/profile/api-tokens) like below
 ````  
