@@ -1,11 +1,10 @@
 log:
   level: ERROR
-  filePath: "/appservices/uploads/logs/traefik.log"
 
 providers:
-  docker: true
-  file:
-    filename: /etc/traefik/dynamic_conf.yml
+  docker:
+    endpoint: unix:///var/run/docker.sock
+    exposedByDefault: false
 
 entrypoints:
   web:
@@ -19,13 +18,13 @@ entrypoints:
     address: :443
   pgadmin:
     address: :8081
-  dashboard:
+  traefik:
     address: :8080
 
 certificatesresolvers:
   myresolver:
     acme:
-      email: mail@name.domain
+      email: itartpro@gmail.com
       storage: /etc/traefik/acme/acme.json
       dnsChallenge:
         provider: cloudflare
