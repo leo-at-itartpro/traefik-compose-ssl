@@ -1,4 +1,4 @@
-# `docker network create docknet` Создаем общую сеть, к которой будут подключатся все контейнеры
+# `docker network create docknet` make a common network to which all our containers will connect and work with traefik
 
 # to get a cloudflare dns api token visit this page: https://dash.cloudflare.com/profile/api-tokens and create this token type:
 # Zone Zone Read
