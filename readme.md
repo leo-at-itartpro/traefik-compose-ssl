@@ -1,4 +1,4 @@
-# Setup for a secure traefik, docker-compose, lets-encrypt and .pem file generation
+# Setup for a secure traefik, portainer, docker-compose, lets-encrypt and .pem file generation
 So this is a repo I made for myself to quickly start up a new server with traefik and lets-encrypt ssl, along with generation of .pem certificate files from lets-encrypt.
 The set-up for certificate retrieval is outlined in traefik.yml and is made to work with dns-challenge from cloudflare to get a wildcard certificate. Also there are instructions in dynamic_conf.yml to redirect all domains (main and subdomains) to https from http and www.
 I have recently added portainer because it is free and makes logging and container management easy.
