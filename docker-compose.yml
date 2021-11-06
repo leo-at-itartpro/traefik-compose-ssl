@@ -1,3 +1,11 @@
+# `docker network create docknet` Создаем общую сеть, к которой будут подключатся все контейнеры
+
+# to get a cloudflare dns api token visit this page: https://dash.cloudflare.com/profile/api-tokens and create this token type:
+# Zone Zone Read
+# Zone DNS  Edit
+
+# do a whoami service for unobstructed generation of ssl
+
 services:
   traefik:
     environment:
@@ -13,8 +21,23 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /appservices/uploads/logs:/appservices/uploads/logs
       - ./traefik:/etc/traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`yourwebsite.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=traefik"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+      # if theres a $ sign make it double ($$) in the password
+      - "traefik.http.middlewares.auth.basicauth.users=username:encrypted-htpasswd-generated-password-goes-here"
+
+      - "traefik.http.routers.http_try.entrypoints=web"
+      - "traefik.http.routers.http_try.rule=Host(`yourwebsite.com`)"
+      - "traefik.http.routers.http_try.middlewares=https_redirect"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true"
 
   traefik-certs-dumper:
     image: ldez/traefik-certs-dumper:v2.7.4
@@ -29,15 +52,38 @@ services:
     volumes:
       - ./traefik/acme:/data
 
-   whoami:
-     image: "traefik/whoami"
-     labels:
-       - "traefik.enable=true"
-       - "traefik.http.routers.whoami.rule=Host(`your-site.com`)"
-       - "traefik.http.routers.whoami.entrypoints=websecure"
-       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+  portainer:
+    image: portainer/portainer-ce
+    logging:
+      options:
+        max-size: 5m
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - 9000:9000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.yourwebsite.com`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=myresolver"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  # whoami:
+  #   image: "traefik/whoami"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.whoami.rule=Host(`postroyka.site`)"
+  #     - "traefik.http.routers.whoami.entrypoints=websecure"
+  #     - "traefik.http.routers.whoami.tls.certresolver=myresolver"
 
 networks:
   default:
     external:
-      name: yournetworkname
+      name: docknet
+
+volumes:
+  portainer_data:
